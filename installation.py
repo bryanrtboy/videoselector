@@ -39,8 +39,7 @@ READKNOB = False
 randcolor = rgbColor.random_colorf(1.0)
 
 # Setup display and initialise pi3d
-DISPLAY = pi3d.Display.create(x=100, y=100, background=(0,0,0,.5), frames_per_second=60)  
-
+DISPLAY = pi3d.Display.create(x=100, y=100, background=(0,0,0,.5), frames_per_second=30)  
 CAMERA = pi3d.Camera()
 CAMERA2D = pi3d.Camera(is_3d=False)
                 
@@ -103,20 +102,19 @@ def ReadInput() :
 	
 	input_value = gpio.input(17)
 	input_value2 = gpio.input(18)
-	
+	  
 	if input_value == False:
 		showSelectedLabel = True
 		#print('You selected a ', models[selectionID].name , ' client is ', clientMachine, '\r')
 		DISPLAY.set_background(.5,.5,.5,1)
-		clientPlayer.open_movie(models[selectionID].name, clientMachine)
-		clientPlayer.pause_movie(models[selectionID].name, clientMachine)	
+		clientPlayer.open_movie(models[selectionID].name, clientMachine)	
 		READKNOB = True
 		while input_value == False:
 			input_value = gpio.input(17)
 		
 	if READKNOB == True :
 		value=mcp.read_adc(0)
-		if len(models) >= 1 :
+		if len(models) >= 1 :  
 			selectionID = int(round( scaleVal.translate(value, 0,1024,0,len(models)-1)))
 		READKNOB = False
 
@@ -170,6 +168,7 @@ while DISPLAY.loop_running():
 				if clientMachine == 4 : # we just played on the 4th client, only one left to go, so automatically progress now
 					showSelectedLabel = True
 					clientPlayer.open_movie(models[0].name, clientMachine)
+					#clientPlayer.pause_movie(clientMachine)
 					selectionID =0
 					DISPLAY.set_background(.5,.5,.5,1)
 				elif clientMachine == 5 : #we finished with the last delay, show the wait screen
@@ -178,6 +177,7 @@ while DISPLAY.loop_running():
 					models = new_models[:]
 					labels = new_labels[:]
 					DISPLAY.set_background(1,1,1,1)
+					clientPlayer.unpause_all()
 		else :
 			ReadInput()
 			models[selectionID].rotateToY(rotY)
@@ -199,6 +199,7 @@ while DISPLAY.loop_running():
 		elif k==100 : #'d' key pressed
 		  DEBUG = not DEBUG
 		elif k==27:
+		  clientPlayer.stop_all_runningmovies()
 		  mykeys.close()
 		  DISPLAY.destroy()
 		  break
