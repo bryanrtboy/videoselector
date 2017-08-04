@@ -6,45 +6,68 @@ import sys
 import time
 
 output = []
-hosts = ['client0', 'client1', 'client2','client3', 'client4']
+hosts = ['client0.local', 'client1.local', 'client2.local','client3.local', 'client4.local']
 client = ParallelSSHClient(hosts)
 
 ssh_clients = []
+
 
 #open a ssh connection for each host
 for host in hosts :
 	one_client = SSHClient(host, user="pi")
 	print("Connecting to ", host)
-	time.sleep(1)
+	#time.sleep(.5)
 	ssh_clients.append(one_client)
 	
 def open_movie(choice, clientID) :
-	num = random.randint(0,2)
+	num = random.randint(1,2)
 	command = "~/dbuscontrol.sh stop"
 	ssh_clients[clientID].exec_command(command, user="pi")
-	command = "omxplayer /mnt/usb/media/" + choice + "/mov_" + str(num) + ".mp4 --aspect-mode=stretch --loop"
+	#time.sleep(.1)
+	command = "omxplayer /mnt/usb/media/" + choice + "/mov_" + str(num) + ".mp4 --aspect-mode=stretch --amp=1000"
 	ssh_clients[clientID].exec_command(command, user="pi")
-	time.sleep(2)
-	pause_movie(clientID)
 	print("Opening a " +choice+ " movie, number " + str(num) + " on " + hosts[clientID] + "!\r")
+	pause_movie(clientID)
 	
 	
 def play_screensaver() :
-	cmds = ["~/dbuscontrol.sh stop", "sleep 1", "omxplayer /mnt/usb/media/intro.mp4 --aspect-mode=stretch --loop"]
-	print("Playing screen saver on all clients")
+	cmds = ["~/dbuscontrol.sh stop"]
 	for cmd in cmds:
 		client.run_command(cmd, user="pi", stop_on_errors=False)
+	time.sleep(.1)	
+	cmds = ["omxplayer /mnt/usb/media/intro.mp4 --aspect-mode=stretch --loop --no-osd"]
+	for cmd in cmds:
+		client.run_command(cmd, user="pi", stop_on_errors=False)
+	print("Playing screen saver on all clients \r")
 	
 def pause_movie(clientID) :
+	time.sleep(1) #allow time for movie to load up
 	command = "~/dbuscontrol.sh pause"
 	ssh_clients[clientID].exec_command(command, user="pi")
-	print("Pausing movie on " + hosts[clientID] + "\r")
+
 	
 def unpause_all() :
 	cmds = ["~/dbuscontrol.sh pause"]
 	for cmd in cmds :
 		client.run_command(cmd, user="pi", stop_on_errors=False)
 		
+def rewind_all() :
+	cmds = ["~/dbuscontrol.sh setposition=0"]
+	for cmd in cmds :
+		client.run_command(cmd, user="pi", stop_on_errors=False)
+
+def setposition_all_delayed(delayTime) :
+	for i in range(len(ssh_clients)):
+		pausePosition = 4000000 - (i * 1000000)
+		time.sleep(delayTime)
+		command = "~/dbuscontrol.sh setposition " + str(pausePosition)
+		ssh_clients[i].exec_command(command, user="pi")
+		print(hosts[i] + " position set to " + str(pausePosition) + "\r")
+
+def play_at_position(clientID, playpos) :
+	command = "~/dbuscontrol.sh setposition " + str(playpos)
+	ssh_clients[clientID].exec_command(command, user="pi")
+	
 def stop_all_runningmovies() :
 	cmds = ["~/dbuscontrol.sh stop"]
 	for cmd in cmds :
