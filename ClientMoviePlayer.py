@@ -11,7 +11,6 @@ client = ParallelSSHClient(hosts)
 
 ssh_clients = []
 
-
 #open a ssh connection for each host
 for host in hosts :
 	one_client = SSHClient(host, user="pi")
@@ -23,13 +22,10 @@ def open_movie(choice, clientID) :
 	num = random.randint(1,2)
 	command = "~/dbuscontrol.sh stop"
 	ssh_clients[clientID].exec_command(command, user="pi")
-	#time.sleep(.1)
 	command = "omxplayer /mnt/usb/media/" + choice + "/mov_" + str(num) + ".mp4 --aspect-mode=stretch --amp=1000"
 	ssh_clients[clientID].exec_command(command, user="pi")
 	print("Opening a " +choice+ " movie, number " + str(num) + " on " + hosts[clientID] + "!\r")
-	pause_movie(clientID)
-	
-	
+
 def play_screensaver() :
 	cmds = ["~/dbuscontrol.sh stop"]
 	for cmd in cmds:
@@ -41,7 +37,6 @@ def play_screensaver() :
 	print("Playing screen saver on all clients \r")
 	
 def pause_movie(clientID) :
-	time.sleep(1) #allow time for movie to load up
 	command = "~/dbuscontrol.sh pause"
 	ssh_clients[clientID].exec_command(command, user="pi")
 
@@ -66,14 +61,13 @@ def setposition_all_delayed(delayTime) :
 
 def play_at_position(clientID, playpos) :
 	command = "~/dbuscontrol.sh setposition " + str(playpos)
-	ssh_clients[clientID].exec_command(command, user="pi")
+	ssh_clients[int(clientID)].exec_command(command, user="pi")
 	
 def stop_all_runningmovies() :
 	cmds = ["~/dbuscontrol.sh stop"]
 	for cmd in cmds :
 		client.run_command(cmd, user="pi", stop_on_errors=False)
 	
-		
 def shutdown_all():
   cmds=["shutdown now"]
   for cmd in cmds:
@@ -83,4 +77,5 @@ def shutdown_all():
      client.join(_output)
      print(_output)
   print("Finished shutting down clients")
+  
 
