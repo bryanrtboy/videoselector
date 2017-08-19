@@ -17,6 +17,7 @@ import RPi.GPIO as gpio
 import Adafruit_GPIO.SPI as SPI
 import Adafruit_MCP3008
 import ScaleValues as scaleVal
+import Selectable as selectable
 
 home_path = "/home/pi/naropa_installation/"
 
@@ -37,58 +38,74 @@ READKNOB = False
 READBUTTON = False
 ROTARYKNOB = True
 
+
 # Setup display and initialise pi3d
-DISPLAY = pi3d.Display.create(x=200, y=200, background=(0,0,0,.5), frames_per_second=30)  #anti-alias use 'samples=4'
+backgroundColor = (0,0,0,1)
+
+
+DISPLAY = pi3d.Display.create(x=200, y=200, background=backgroundColor, frames_per_second=30)  #anti-alias use 'samples=4'
 CAMERA = pi3d.Camera()
 CAMERA2D = pi3d.Camera(is_3d=False)
           
 #light = pi3d.Light(lightpos=(-2.0, 3.0, 5.0), lightcol=(10.0, 10.0, 30.0), lightamb=(1.02, 10.01, 5.03), is_point=False)
-light = pi3d.Light(lightpos=(1, -1, -3), lightcol=(1.0, 1.0, 1.0), lightamb=(0.25, 0.2, 0.3))
+light = pi3d.Light(lightpos=(1, -1, -3), lightcol=(1.0, 1.0, 1.0), lightamb=(0.75, 0.75, 0.75), is_point=False)
 
 flatsh = pi3d.Shader("uv_flat")
-#shadermat = pi3d.Shader("mat_flat")
+shadermat = pi3d.Shader("mat_light")
 
 #Set up the 3D models
-xyz = .02
+xyz = .03
 
-gun = pi3d.Model(file_string= home_path + 'models/gun.obj', camera=CAMERA, name='gun',z=10.0)
-gun.scale(xyz,xyz,xyz)
+names = ["gun","bear","fork","knife","cake"]
+models = []
 
-bear = pi3d.Model(file_string=home_path + 'models/bear.obj', camera=CAMERA, name='bear', z=10.0)
-bear.scale(xyz,xyz,xyz)
+for objname in names :
+	temp = selectable.MySelectableObject()
+	temp.obj = pi3d.Model(file_string= home_path + 'models/' + objname + '.obj', camera=CAMERA, name=objname,z=0.0)
+	temp.obj.scale(xyz,xyz,xyz)
+	temp.obj.set_shader(shadermat)
+	temp.obj.set_light(light)
+	temp.obj.set_fog(fogshade=(.0,.0,.0,.0), fogdist=32)
+	models.append(temp)
 
-fork = pi3d.Model(file_string=home_path + 'models/fork.obj', camera=CAMERA, name='fork', z=10.0)
-fork.scale(xyz,xyz,xyz)
+validColor = (0.0,1.0,1.0)
+invalidColor = (0.1,0.1,0.4)
+selectedColor = (1.0,.2,.0)
 
-knife = pi3d.Model(file_string=home_path + 'models/knife.obj', camera=CAMERA, name='knife', z=10.0)
-knife.scale(xyz,xyz,xyz)
+screenWidth = 40
+positionIncrement = screenWidth/6 #we need 6 spaces for 5 models
+screenWidth = screenWidth/2 #make the width relative to center of the screen, i.e -10 to 10
 
-cake = pi3d.Model(file_string=home_path + 'models/cake.obj', camera=CAMERA, name='cake', z=10.0)
-cake.scale(xyz,xyz,xyz)
 
-models = [bear,gun,fork,cake,knife]
-validColor = (1.0,1.0,1.0)
-invalidColor = (0.1,0.1,0.1)
-startPosition = -15
-maxMovePosition = 18
-
-for i in range(len(models)):
-	models[i].set_line_width(line_width=2.0,strip=True,closed=True)
-	models[i].set_material(material=validColor)
-	if ROTARYKNOB == True :
-		models[i].positionX( startPosition + (i * 8))
-		print ( "Placing ", str(models[i].name), " at ", str(models[i].x()))
+def ModelSetup() :
+	global screenWidth
+	global positionIncrement
+	global selectable
 	
+	pos = -screenWidth #start positioning from the left edge
+
+	for model in models :
+		model.obj.set_line_width(line_width=1.0,strip=True,closed=True)
+		model.obj.set_material(material=validColor)
+		model.isValidSelection = True
+		if ROTARYKNOB == True :
+			pos += positionIncrement
+			model.obj.positionX(pos)
+			print ( "Placing ", str(model.obj.name), " at ", str(round(model.obj.x(),4)), "\r")
+	
+ModelSetup()
+
 new_models = models[:]
 
 #set up the waiting screen and camera for it
-waitscreen = pi3d.FixedString(home_path + 'fonts/NotoSans-Regular.ttf', "Waiting for a bit...", font_size=72, color=(255, 0, 0, 255), background_color=(255,255,255,255),
+waitscreen = pi3d.FixedString(home_path + 'fonts/NotoSans-Regular.ttf', "Loading...", font_size=72, color=(0, 255, 255, 255), background_color=(255,0,0,0),
 camera=CAMERA2D, shader=flatsh, f_type='SMOOTH')
 waitscreen.sprite.position(0,0,0)
 
 selectionID = 0
 selected = [] #keep track of what has been selected...
 makeSelection = False
+
 clientMachine = 0
 isPlayingVideoLoop = False
 
@@ -97,7 +114,7 @@ isPlayingVideoLoop = False
 rotY =0
 rotX = 0
 moveX_increment = 0.01
-
+threshold = 2
 
 #start counting to read serial data
 intervalCount = 0
@@ -118,6 +135,7 @@ delayedClient =0
 
 current_knobValue = 0.0
 last_knobValue =0.0
+
 
 def ReadInput() :
 	global selectionID
@@ -146,7 +164,7 @@ def ReadInput() :
 				if ROTARYKNOB == False :
 					selectionID = int(round( scaleVal.translate(current_knobValue, 0,1024,0,len(models)-1))) #Scales the volume dial to the array range
 				else :
-					makeSelection = True #go ahead and select whatever model is nearest to positionX = 0
+					selectByPosition = True #go ahead and select whatever model is nearest to positionX = 0
 			
 			READKNOB = False
 	
@@ -175,46 +193,60 @@ while DISPLAY.loop_running():
 			READKNOB = True
 		
 		if ROTARYKNOB == True :
+			clockwise = True
+			amount = 0
+			
+			if last_knobValue < current_knobValue :
+				clockwise = True
+				amount = current_knobValue - last_knobValue
+			else :
+				clockwise = False
+				amount = last_knobValue - current_knobValue
+			
+			speed = moveX_increment * amount
+			
+			if speed > .9 :
+				speed = .9
+							
 			for model in models :
-				model.rotateToY(rotY)
-				amount = abs( current_knobValue - last_knobValue)
-				if current_knobValue < last_knobValue :
-					model.translateX(-amount * moveX_increment)
-					if model.x() <= -maxMovePosition :
-						model.positionX(maxMovePosition)
-				else :
-					model.translateX(amount * moveX_increment)
-					if model.x() >= maxMovePosition :
-						model.positionX(-maxMovePosition)
+				model.obj.draw()
+				
+				pos = 0 
+				rewindPos = screenWidth - positionIncrement
+				#Move right or left
+				if clockwise == False : 
+					pos = model.obj.x() - speed
+					if pos <= -screenWidth :
+						pos = rewindPos
+				else : 
+					pos = model.obj.x() + speed
+					if pos >= screenWidth :
+						pos = -rewindPos
+						
+				if amount > threshold :
+					model.obj.positionX(pos)
+			
+				zOffset = 0.0
+				
+				if model.obj.x() > -2.5 and model.obj.x() < 2.5 : # In the Selection Zone
 					
-				temp_id = models.index(model)
-				#if temp_id in selected :
-					#model.set_line_width(line_width=0.01)
-				#else :
-					#model.set_line_width(line_width=2.0)
-					
-				model.draw()
-
-
-				if makeSelection == True and model.x() > -1.5 and model.x() < 1.5 :
-					makeSelection = False
-					
-					if temp_id in selected :
-						if DEBUG == True :
-							print("Not a valid selection\r")
-					else :
+					if model.isValidSelection == True :
+						zOffset = (2.5 - abs(model.obj.x())) * 5
 						selectionID = models.index(model)
-					if DEBUG == True :
-						print ("Selection ID is ", str(selectionID), ", a ", model.name, "\r")
-
+						model.obj.rotateIncX(-3)
+				else :
+					model.obj.rotateToX(0)
+				model.obj.positionZ(-zOffset + 20.0)
+				model.obj.positionY((zOffset*.4) - 4)
+				model.obj.rotateToY(rotY)
 		
-		if delayMode == False :
+		if delayMode == False : #Delay Mode is to give the client movie time to load, before pausing it, so we don't want new Input either
 			ReadInput()
-			#drawing needs to be after reading input because we are deleting items from the array
+			#drawing needs to be after reading input because we are deleting items from the array with a knob
 			if ROTARYKNOB == False :
-				models[selectionID].rotateToY(rotY)
-				models[selectionID].rotateToX(rotX)
-				models[selectionID].draw()
+				models[selectionID].obj.rotateToY(rotY)
+				models[selectionID].obj.rotateToX(rotX)
+				models[selectionID].obj.draw()
 		else :
 			delayCount += delayIncrement
 			if delayCount >= delayMax :
@@ -225,29 +257,39 @@ while DISPLAY.loop_running():
 				if ROTARYKNOB == False :
 					models.remove(models[selectionID]) #Don't need to do remove when using a rotary knob
 				
-				selected.append(selectionID) #add the ID to the selected objects
-				
 				clientMachine += 1 #move on to the next machine			
 				if clientMachine >= 5 : #we selected the last item, do the other things...
 					clientMachine = 0
 					
-					models = new_models[:] #Do not need to reset the array anymore
+					if ROTARYKNOB == False :
+						models = new_models[:] #Do not need to reset the array when using rotary
+					else :
+						ModelSetup()
+						
 					selected = [] #reset the selected ID array
-					DISPLAY.set_background(1,1,1,1)
+					#DISPLAY.set_background(1,1,1,1)
 					unpauseAllVideos=True
 					isPlayingVideoLoop = True
 		
 		if READBUTTON == True :
 			READBUTTON = False
-			delayMode = True
-			models[selectionID].set_material(material=invalidColor)
-			#clientPlayer.open_movie(models[selectionID].name, clientMachine)
-			
+			if selectionID in selected :
+				print("Not a valid selection\r")
+			elif abs(models[selectionID].obj.x()) <= 2.5 :
+				delayMode = True
+				print("Opening a ", names[selectionID], " movie on ", clientMachine, "\r")
+				selected.append(selectionID)
+				models[selectionID].obj.set_material(material=invalidColor)
+				models[selectionID].isValidSelection = False
+				if clientMachine >= 4 :
+					DISPLAY.set_background(invalidColor[0], invalidColor[1], invalidColor[2],1)
+				#clientPlayer.open_movie(names[selectionID], clientMachine)
+			else :
+				print("Object is not the selection area")
 			
 	else :
 		waitscreen.draw()
-		#finalCountdown += 1
-		
+
 		if delayMode == True :
 			delayCount += delayIncrement
 			
@@ -278,7 +320,7 @@ while DISPLAY.loop_running():
 			isPlayingVideoLoop = False
 			#clientPlayer.play_screensaver()
 			finalCountdown=0
-			DISPLAY.set_background(0,0,0,.5)
+			DISPLAY.set_background(backgroundColor[0],backgroundColor[1], backgroundColor[2], backgroundColor[3])
 		
 
 	k = mykeys.read()
