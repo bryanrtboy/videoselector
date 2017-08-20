@@ -127,6 +127,8 @@ delayCount=0
 delayIncrement = .1
 delayMax = 10
 
+resetTimer = 0
+
 def ReadRotaryInput() :
 	global counter
 	global clkLastState
@@ -184,6 +186,17 @@ moveAmount = 0
 while DISPLAY.loop_running():	
 
 	if isPlayingVideoLoop == False :
+		if clientMachine > 0 :
+			resetTimer += 1
+		
+		if resetTimer > 3000 :
+		 	clientMachine = 0
+            		ModelSetup()
+                        selected = [] #reset the selected ID array                 
+	                unpauseAllVideos=True
+                        isPlayingVideoLoop = True
+			resetTimer=0
+
 		ReadRotaryInput()
 		
 		if counter == 1 and moveAmount  < 1.0 :
@@ -245,7 +258,7 @@ while DISPLAY.loop_running():
 				delayCount = 0
 				print("Sending a pause message to " + str(clientMachine) + "\r")
 				clientPlayer.pause_movie(clientMachine)
-				
+				resetTimer=0
 				clientMachine += 1 #move on to the next machine			
 				if clientMachine >= 5 : #we selected the last item, do the other things...
 					clientMachine = 0
