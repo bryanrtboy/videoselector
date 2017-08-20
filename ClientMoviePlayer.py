@@ -23,7 +23,7 @@ def open_movie(choice, clientID) :
 	num = "%02d" % (num,)
 	command = "~/dbuscontrol.sh stop"
 	ssh_clients[clientID].exec_command(command, user="pi")
-	command = "omxplayer /mnt/usb/media/" + choice + "/mov_" + str(num) + ".mp4 --aspect-mode=stretch --amp=1000"
+	command = "omxplayer /mnt/usb/media/" + choice + "/mov_" + str(num) + ".mp4 --aspect-mode=stretch --amp=1000 --no-osd"
 	ssh_clients[clientID].exec_command(command, user="pi")
 	print("Opening a " +choice+ " movie, number " + str(num) + " on " + hosts[clientID] + "!\r")
 
