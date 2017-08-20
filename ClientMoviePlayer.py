@@ -19,7 +19,8 @@ for host in hosts :
 	ssh_clients.append(one_client)
 	
 def open_movie(choice, clientID) :
-	num = random.randint(1,2)
+	num = random.randint(1,30)
+	num = "%02d" % (num,)
 	command = "~/dbuscontrol.sh stop"
 	ssh_clients[clientID].exec_command(command, user="pi")
 	command = "omxplayer /mnt/usb/media/" + choice + "/mov_" + str(num) + ".mp4 --aspect-mode=stretch --amp=1000"

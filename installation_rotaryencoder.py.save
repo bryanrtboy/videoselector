@@ -35,14 +35,12 @@ clkLastState = GPIO.input(clk)
 DEBUG = False
 READKNOB = False
 READBUTTON = False
-ROTARYKNOB = True
-
 
 # Setup display and initialise pi3d
 backgroundColor = (0,0,0,1)
 
 
-DISPLAY = pi3d.Display.create(x=0, y=0, background=backgroundColor, frames_per_second=60)  #anti-alias use 'samples=4'
+DISPLAY = pi3d.Display.create(x=200, y=200, background=backgroundColor, frames_per_second=30)  #anti-alias use 'samples=4'
 CAMERA = pi3d.Camera()
 CAMERA2D = pi3d.Camera(is_3d=False)
           
@@ -107,6 +105,7 @@ makeSelection = False
 clientMachine = 0
 isPlayingVideoLoop = False
 
+
 #set initial rotation value
 rotY =0
 rotX = 0
@@ -115,6 +114,7 @@ threshold = 2
 
 #start counting to read serial data
 intervalCount = 0
+print("Got to here...")
 
 # Fetch key presses
 mykeys = pi3d.Keyboard()
@@ -131,10 +131,12 @@ delayIncrement = .1
 delayMax = 5
 delayedClient =0
 
+current_knobValue = 0.0
+last_knobValue =0.0
+
 def ReadRotaryInput() :
 	global counter
 	global clkLastState
-	global clockwise
 	global READBUTTON
 	global READKNOB
 	
@@ -145,23 +147,23 @@ def ReadRotaryInput() :
 			counter = 1
 		else:
 			counter = -1
-		#print (str(counter), "\r")
-	else :
+		print (str(counter), "\r")
+        else :
 		counter = 0
 	clkLastState = clkState
 	#sleep(0.01)
 	
-	#input_state = GPIO.input(22)
-	#if input_state == False:
-		#print('B1 Pressed')
-		#READKNOB = True
-		##time.sleep(0.2)
+	input_state = GPIO.input(22)
+	if input_state == False:
+		print('B1 Pressed')
+		READKNOB = True
+		#time.sleep(0.2)
 	
-	#input_state = GPIO.input(23)
-	#if input_state == False:
-		#print('B2 pressed')
-		#READBUTTON = True
-		##time.sleep(0.2)
+	input_state = GPIO.input(23)
+	if input_state == False:
+		print('B2 pressed')
+		READBUTTON = True
+		#time.sleep(0.2)
 
 
 def ReadInput() :
@@ -174,20 +176,25 @@ def ReadInput() :
 	global makeSelection
 	global current_knobValue
 	global last_knobValue
-	global clockwise
+	global counter
 	
-	input_value = GPIO.input(23)
-	input_value2 = GPIO.input(22)
+	input_value = GPIO.input(22)
+	input_value2 = GPIO.input(23)
 	 
 	if delayMode == False :
 		if input_value == False:
 			READBUTTON = True
 			while input_value == False:
-				input_value = GPIO.input(23)
+				input_value = GPIO.input(22)
 			
-		if READKNOB == True : 
-			selectByPosition = True #go ahead and select whatever model is nearest to positionX = 0
+		if READKNOB == True :
+			#last_knobValue = current_knobValue
+			#current_knobValue=mcp.read_adc(0)
+			if len(models) >= 1 :  
+				selectByPosition = True #go ahead and select whatever model is nearest to positionX = 0
+			
 			READKNOB = False
+	
 			if DEBUG == True :
 				print('Channel 0: {0}\r'.format(current_knobValue))
 			
@@ -197,12 +204,12 @@ def ReadInput() :
 		time.sleep(5)
 		os.system("sudo shutdown -h now")
 		while input_value2 == False:
-			input_value2 = GPIO.input(22)
+			input_value2 = GPIO.input(23)
+print("Starting Display Loop")
 
 while DISPLAY.loop_running():	
 
 	if isPlayingVideoLoop == False :
-		ReadRotaryInput()
 		rotY += 1
 		if rotY >= 360 :
 			rotY = 0
@@ -211,41 +218,51 @@ while DISPLAY.loop_running():
 		if intervalCount >= 1 :
 			intervalCount =0
 			READKNOB = True
-			
+		
+	
+		clockwise = True
+		amount = 0
+						
 		for model in models :
 			model.obj.draw()
-			
+				
 			pos = 0 
 			rewindPos = screenWidth - positionIncrement
-			#Move object
-			pos = model.obj.x() + (1 * counter)
-			if pos >= screenWidth :
-				pos = -rewindPos
+			#Move right or left
+				if clockwise == False : 
+					pos = model.obj.x() - speed
+					if pos <= -screenWidth :
+						pos = rewindPos
+				else : 
+					pos = model.obj.x() + speed
+					if pos >= screenWidth :
+						pos = -rewindPos
+						
+				if 
+					model.obj.positionX(pos)
+			
+				zOffset = 0.0
 				
-			model.obj.positionX(pos)
+				if model.obj.x() > -2.5 and model.obj.x() < 2.5 : # In the Selection Zone
+					
+					if model.isValidSelection == True :
+						zOffset = (2.5 - abs(model.obj.x())) * 5
+						selectionID = models.index(model)
+						model.obj.rotateIncX(-3)
+				else :
+					model.obj.rotateToX(0)
+				model.obj.positionZ(-zOffset + 20.0)
+				model.obj.positionY((zOffset*.4) - 4)
+				model.obj.rotateToY(rotY)
 		
-			zOffset = 0.0
-			
-			if model.obj.x() > -2.5 and model.obj.x() < 2.5 : # In the Selection Zone
-				
-				if model.isValidSelection == True :
-					zOffset = (2.5 - abs(model.obj.x())) * 5
-					selectionID = models.index(model)
-					model.obj.rotateIncX(-3)
-			else :
-				model.obj.rotateToX(0)
-			model.obj.positionZ(-zOffset + 20.0)
-			model.obj.positionY((zOffset*.4) - 4)
-			model.obj.rotateToY(rotY)
-	
 		if delayMode == False : #Delay Mode is to give the client movie time to load, before pausing it, so we don't want new Input either
-			ReadInput()
-			#ReadRotaryInput()
+			#ReadInput()
+			ReadRotaryInput()
 			#drawing needs to be after reading input because we are deleting items from the array with a knob
-			
-			models[selectionID].obj.rotateToY(rotY)
-			models[selectionID].obj.rotateToX(rotX)
-			models[selectionID].obj.draw()
+			if ROTARYKNOB == False :
+				models[selectionID].obj.rotateToY(rotY)
+				models[selectionID].obj.rotateToX(rotX)
+				models[selectionID].obj.draw()
 		else :
 			delayCount += delayIncrement
 			if delayCount >= delayMax :
@@ -253,11 +270,17 @@ while DISPLAY.loop_running():
 				delayCount = 0
 				print("Sending a pause message to " + str(clientMachine) + "\r")
 				clientPlayer.pause_movie(clientMachine)
+				if ROTARYKNOB == False :
+					models.remove(models[selectionID]) #Don't need to do remove when using a rotary knob
 				
 				clientMachine += 1 #move on to the next machine			
 				if clientMachine >= 5 : #we selected the last item, do the other things...
 					clientMachine = 0
-					ModelSetup()
+					
+					if ROTARYKNOB == False :
+						models = new_models[:] #Do not need to reset the array when using rotary
+					else :
+						ModelSetup()
 						
 					selected = [] #reset the selected ID array
 					#DISPLAY.set_background(1,1,1,1)
@@ -294,7 +317,7 @@ while DISPLAY.loop_running():
 			finalCountdown += 1
 		
 		if setPositions == True and delayMode == False:
-			pos = 10000000 - (positionCount * 1000000)
+			pos = 4500000 - (positionCount * 1000000)
 			clientPlayer.play_at_position(positionCount, pos)
 			print("sending position " + str(pos) + " to " + str(positionCount) + "\r")
 			positionCount += 1
@@ -309,7 +332,7 @@ while DISPLAY.loop_running():
 			print("Unpaused all the videos\r")
 			delayMode = True
 
-		if finalCountdown >= 100 : #need to insure that the delays are not truncated by this function...
+		if finalCountdown >= 600 : #need to insure that the delays are not truncated by this function...
 			isPlayingVideoLoop = False
 			clientPlayer.play_screensaver()
 			finalCountdown=0
