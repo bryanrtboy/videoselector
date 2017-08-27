@@ -42,9 +42,9 @@ This page has some helpful instructions for how to [automatically run ssh-add wi
 
 You will need to generate a key on the serving machine and then send it over to the client machine, making sure that you have already  set  the client Pi to allow empty passwords. 
 
-From the server, log in into the client machine: `sudo nano /etc/ssh/sshd_config`
+From the server, follow instructions to [remote access without passwords](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md) in order to log in into the client machine without a password prompt. You'll need to set up each client to allow empty passwords : `sudo nano /etc/ssh/sshd_config` , look for the option to do so in that file.
 
-Set it to allow empty passwords. Follow the instructions for the server [here](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md) Copy over the id_rsa.pub to the client machine as instructed in that article. Technically, you can leave the server’s sshd_config as is, just the client needs to allow no password, but following these instructions I set up the server to allow my mac to login without a prompt as well.
+Copy over the id_rsa.pub to the client machine as instructed in that article. Technically, you can leave the server’s sshd_config as is, just the client needs to allow no password, but following these instructions I set up the server to allow my mac to login without a prompt as well.
 
 #### Setting up the client Pi's:
 1. Install jessie
