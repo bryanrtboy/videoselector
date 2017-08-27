@@ -1,4 +1,4 @@
-![alt text](videoselector/IMG_0099.jpg)
+![alt text](https://github.com/bryanrtboy/videoselector/blob/master/IMG_0099.jpg)
 
 ## Video Selector
 
