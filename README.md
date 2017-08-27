@@ -52,20 +52,21 @@ Copy over the id_rsa.pub to the client machine as instructed in that article. Te
 
 #### Setting up a client Pi:
 
-1. Install jessie
-2. Create a .ssh folder
+1. Install [jessie or stretch](https://www.raspberrypi.org/documentation/installation/installing-images/), NOT jessie-lite or stretch-lite, omxplayer needs some things.
+2. Set the pi up so it does not launch Pixel desktop
+3. Create a .ssh folder
 ```
 cd ~
 install -d -m 700 ~/.ssh
 ```
-3. Set sshd_config to allow no password : `sudo nano /etc/ssh/sshd_config`
-4. From the server pi, [copy over the id_rsa.pub key to the client](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
-5. Install [dbuscontrol.sh](https://github.com/popcornmix/omxplayer)
+4. Set sshd_config to allow no password : `sudo nano /etc/ssh/sshd_config`
+5. From the server pi, [copy over the id_rsa.pub key to the client](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
+6. Install [dbuscontrol.sh](https://github.com/popcornmix/omxplayer)
 ```
 sudo nano ~/dbuscontrol.sh
 sudo chmod 755 ~/dbuscontrol.sh
 ```
-6. Create a [mount point](https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=38058) for the USB drive, where we will store our videos 
+7. Create a [mount point](https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=38058) for the USB drive, where we will store our videos 
    - On the Pi make a directory: `sudo mkdir -p /mnt/usb`
    - Then set it to start up and mount to that directory: `sudo nano /etc/fstab`
    - Add this line to the end of fstab: `/dev/sda1 /mnt/usb vfat defaults,nofail 0 2`
