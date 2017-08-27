@@ -66,10 +66,10 @@ sudo nano ~/dbuscontrol.sh
 sudo chmod 755 ~/dbuscontrol.sh
 ```
 6. Create a [mount point](https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=38058) for the USB drive, where we will store our videos 
-  -- On the Pi make a directory: `sudo mkdir -p /mnt/usb`
-  -- Then set it to start up and mount to that directory: `sudo nano /etc/fstab`
-  -- Add this line to the end of fstab: `/dev/sda1 /mnt/usb vfat defaults,nofail 0 2`
-  -- This setup assumes there is only one other drive plugged in and it's going to be called `sda`.
+  - - On the Pi make a directory: `sudo mkdir -p /mnt/usb`
+  - - Then set it to start up and mount to that directory: `sudo nano /etc/fstab`
+  - - Add this line to the end of fstab: `/dev/sda1 /mnt/usb vfat defaults,nofail 0 2`
+  - - This setup assumes there is only one other drive plugged in and it's going to be called `sda`.
 
 If you get errors running dbuscontrol from your scripts, you might need to run omxplayer as sudo.
 
@@ -79,13 +79,13 @@ The clients each expect to have a USB stick with a folder called 'media'. In the
 - media
 - - gun
 - - - mov_01.mp4
---- mov_02.mp4
---- etc..
--- cake
--- fork
--- knife
--- bear
--- intro.mp4
+- - - mov_02.mp4
+- - - etc..
+- - cake
+- - fork
+- - knife
+- - bear
+- - intro.mp4
 
 Each folder has the same number of videos, numbered in sequence starting with 'mov_01.mp4'. The script randomly picks and plays from those folders.
 
