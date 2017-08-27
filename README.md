@@ -2,14 +2,33 @@
 
 This project uses a Raspberry Pi 3 as a server/controller to play videos on 5 client Pi's connected via a WIFI network. This set of python scripts is running on the server. The server is hooked up to a rotary encoder and two buttons. The rotary dial allows the user to scroll through 3D models rendered on screen, a button is then used to make a selection. Once the button is pressed, a video on one of the client machines starts up. The second button shuts down all of the clients, and then the server.
 
+### Server dependencies
+The following should be installed on the server Pi:
+- [Paralell-SSH](http://parallel-ssh.readthedocs.io/en/latest/index.html) for connecting to the clients
+- [Pi 3D](https://pi3d.github.io/html/) to display the interface elements
+
+### Client dependencies
+-[omxplayer](https://github.com/popcornmix/omxplayer)
+-[dbuscontrol.sh](https://github.com/popcornmix/omxplayer) install dbuscontrol.sh at the root of each client machine
+
 ### Setting up the Server to log in automatically
 
-I generated ssh keys to allow me to start a ssh Terminal session from my MacBook and connect to the server without a password prompt. Do that first, so that you can understand the process of generating and copying keys. Once that is working, you do the same process from the server Pi's terminal to each client. [Remote access without passwords](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
+I generated ssh keys to allow me to start a ssh Terminal session from my MacBook and connect to the server without a password prompt. You should be able to enter `ssh pi@server.local` and log in with no warnings. Do that first, so that you can understand the process of generating and copying keys. Once that is working, you do the same process from the server Pi's terminal to each client. 
+
+Follow the instructions here for the Pi's [Remote access without passwords](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
 
 On the mac, make sure the username you use matches, i.e. bryan@bryans-macbook-2015 where the instructions above say say eben@pi
 Once you've done this, if the Terminal keeps asking for a password enter:
-```ssh-add
+
 ```
+ssh-add
+```
+If you get warnings from the mac about suspicious behaviors after swapping out SD cards on the Pi, you need to add/update the pi in the mac's keychain. In Terminal:
+`ssh-keygen -f "/Users/bryan/.ssh/known_hosts" -R server.local`
+
+When doing this from the server pi to the clients, use the command:
+`ssh-keygen -f "/home/pi/.ssh/known_hosts" -R client0.local`
+
 On the Pi, the `ssh-add` command would not work returning `could not connect agent`.  This seems to mean that the ssh-agent is not running. You need to start it up first:
 ```
 pi@server: exec ssh-agent bash
@@ -27,14 +46,25 @@ Set it to allow empty passwords. Follow the instructions for the server [here](h
 #### Set up steps for the client machines:
 1. Install jessie
 2. Create a .ssh folder
-`cd ~`
-`install -d -m 700 ~/.ssh`
+```
+cd ~
+install -d -m 700 ~/.ssh
+```
 3. Set sshd_config to allow no password on the cl
 4. On the server pi, copy over the id_rsa.pub key to the client1 pi
 5. Install [dbuscontrol.sh](https://github.com/popcornmix/omxplayer)
-`sudo nano ~/dbuscontrol.sh`
-`sudo chmod 755 ~/dbuscontrol.sh`
-You might need to run omxplayer as sudo if you get dbuscontrol errors
+```
+sudo nano ~/dbuscontrol.sh
+sudo chmod 755 ~/dbuscontrol.sh
+```
+6. Create a [mount point](https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=38058) for the USB drive, where we will store our videos 
+  - On the Pi make a directory: `sudo mkdir -p /mnt/usb`
+  - Then set it to start up and mount to that directory: `sudo nano /etc/fstab`
+  - Add this line to the end of fstab: `/dev/sda1 /mnt/usb vfat defaults,nofail 0 2`
+  - This setup assumes there is only one other drive plugged in and it's going to be called `sda`.
+
+
+If you get errors running dbuscontrol from your scripts, you might need to run omxplayer as sudo.
 
 
 ### Setting up WIFI on all the machines
@@ -47,34 +77,3 @@ After doing that, you can check what was added :
 ```
 sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
 ```
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-There is not much special about the client Pi systems, but they need to be set up without a password so that the server can automatically connect.
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/bryanrtboy/videoselector/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
