@@ -112,7 +112,7 @@ python naropa_installation/main.py
 ```
 into `nano ~/.bashrc` works, but it runs with each login. You may have to change [ownership and permissions](https://raspberrypi.stackexchange.com/questions/12853/automatically-run-a-program-as-root-for-gpio) on the main.py and Client scripts for it to work with GPIO devices.
 
-I would love a pull request with a better startup script idea. Seems like there are too many ways to do run Python startup scripts, and they all have issues with permissions, user, etc. For example, adding this to `/etc/rc.local` did not seem to work:
+I would love a pull request with a better startup script idea. Seems like there are too many ways to do this on the Raspberry Pi, and many all have issues with permissions, user, etc. For example, adding this to `/etc/rc.local` did not seem to work:
 ```
 startscript(){
   sleep 10
@@ -122,5 +122,5 @@ startscript(){
 startscript&
 exit 0
 ```
-The SSH scripts were not able to connect to the clients, I'm sure it's because the keys are generated from 'pi' user, not root. [Logging in to the LXDE](http://www.opentechguides.com/how-to/article/raspberry-pi/5/raspberry-pi-auto-start.html) environment allowed SSH to connect, but the server display did not show the interface. 
+The SSH scripts were not able to connect to the clients, I'm sure it's because the keys are generated from 'pi' user, not root. [Logging in to the LXDE](http://www.opentechguides.com/how-to/article/raspberry-pi/5/raspberry-pi-auto-start.html) environment allowed SSH to connect, but the server display did not show the interface. The problem is, unless someone is trying to do the same thing, i.e. connect via SSH at startup, use the server as the main disply, etc., it's difficult to parse where the problem is and what the best approach is to run this at startup.
 
