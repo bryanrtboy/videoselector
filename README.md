@@ -50,15 +50,16 @@ From the server, follow instructions to [remote access without passwords](https:
 
 Copy over the id_rsa.pub to the client machine as instructed in that article. Technically, you can leave the server’s sshd_config as is, just the client needs to allow no password, but following these instructions I set up the server to allow my mac to login without a prompt as well.
 
-#### Setting up the client Pi's:
+#### Setting up a client Pi:
+
 1. Install jessie
 2. Create a .ssh folder
 ```
 cd ~
 install -d -m 700 ~/.ssh
 ```
-3. Set sshd_config to allow no password on the cl
-4. On the server pi, copy over the id_rsa.pub key to the client1 pi
+3. Set sshd_config to allow no password : `sudo nano /etc/ssh/sshd_config`
+4. From the server pi, [copy over the id_rsa.pub key to the client](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
 5. Install [dbuscontrol.sh](https://github.com/popcornmix/omxplayer)
 ```
 sudo nano ~/dbuscontrol.sh
@@ -69,7 +70,6 @@ sudo chmod 755 ~/dbuscontrol.sh
   - Then set it to start up and mount to that directory: `sudo nano /etc/fstab`
   - Add this line to the end of fstab: `/dev/sda1 /mnt/usb vfat defaults,nofail 0 2`
   - This setup assumes there is only one other drive plugged in and it's going to be called `sda`.
-
 
 If you get errors running dbuscontrol from your scripts, you might need to run omxplayer as sudo.
 
