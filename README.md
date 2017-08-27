@@ -8,8 +8,8 @@ The following should be installed on the server Pi:
 - [Pi 3D](https://pi3d.github.io/html/) to display the interface elements
 
 ### Client dependencies
--[omxplayer](https://github.com/popcornmix/omxplayer)
--[dbuscontrol.sh](https://github.com/popcornmix/omxplayer) install dbuscontrol.sh at the root of each client machine
+- [omxplayer](https://github.com/popcornmix/omxplayer)
+- [dbuscontrol.sh](https://github.com/popcornmix/omxplayer) install dbuscontrol.sh at the root of each client machine
 
 ### Setting up the Server to log in automatically
 
