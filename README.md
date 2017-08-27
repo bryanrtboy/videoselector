@@ -1,3 +1,5 @@
+![alt text](videoselector/IMG_0099.jpg)
+
 ## Video Selector
 
 This project uses a Raspberry Pi 3 as a server/controller to play videos on 5 client Pi's connected via a WIFI network. There should be no limit to the number of clients used. 
