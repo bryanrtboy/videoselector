@@ -2,6 +2,10 @@
 
 This project uses a Raspberry Pi 3 as a server/controller to play videos on 5 client Pi's connected via a WIFI network. This set of python scripts is running on the server. The server is hooked up to a rotary encoder and two buttons. The rotary dial allows the user to scroll through 3D models rendered on screen, a button is then used to make a selection. Once the button is pressed, a video on one of the client machines starts up. The second button shuts down all of the clients, and then the server.
 
+The script could be altered to accept keyboard commands and not use any GPIO hardware. To do so, set the 'counter' variable to the value -1 with the left arrow key, +1 with the right this would scroll the models left to right.  Use a key press to set READBUTTON to True in order to make the selection. READKNOB is probably not needed, that is used to poll the hardware at a reasonable rate, rather than the 60 FPS of the display loop.
+
+The most difficult part of this project was setting up automatic login from the server to the clients. Notes on how I did that are below.
+
 ### Server dependencies
 The following should be installed on the server Pi:
 - [Paralell-SSH](http://parallel-ssh.readthedocs.io/en/latest/index.html) for connecting to the clients
