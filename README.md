@@ -124,5 +124,13 @@ exit 0
 ```
 The SSH script could not connect to the clients, I'm sure it's because the ssh keys are generated from 'pi' user, not root, and starting up is done by root. Putting the commands to [log into the LXDE](http://www.opentechguides.com/how-to/article/raspberry-pi/5/raspberry-pi-auto-start.html) environment allowed SSH to connect, the clients launched their videos. But, the server display did not show the interface. I could not figure out why not. 
 
-Unless someone is trying to do the same thing, i.e. connect via SSH at startup, use the server as the main display, etc., it's difficult to parse where the problem lies and what the best approach might be to run this at startup. Using `~/.bashrc` is OK, but since the display is running as root, it won't respond to keyboard commands. Logging in via another machine, causes a new instance to run, which does respond to keyboard commands, but leaves the first instance running. To quit, you have to `killall -9 UID` from terminal.
+Unless someone is trying to do the same thing, i.e. connect via SSH at startup, use the server as the main display, etc., it's difficult to parse where the problem lies and what the best approach might be to run this at startup. Using `~/.bashrc` is OK, but since the display is running as root, it won't respond to keyboard commands. Logging in via another machine, causes a new instance to run, which does respond to keyboard commands, but leaves the first instance running. To quit, you have to:
+```
+ps aux | less
+```
+Find the UID of the process
+```
+killall -9 [UID]
+``` 
+
 
