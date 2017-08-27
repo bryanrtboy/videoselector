@@ -1,8 +1,6 @@
-## Welcome to GitHub Pages
+## Video Selectoer
 
-You can use the [editor on GitHub](https://github.com/bryanrtboy/videoselector/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
-
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+This project uses a Raspberry Pi 3 as a server/controller to play videos on 5 client Pi's connected via a WIFI network. This set of python scripts is running on the server. The server is hooked up to a rotary encoder and two buttons. The rotary dial allows the user to scroll through 3D models rendered on screen, a button is then used to make a selection. Once the button is pressed, a video on one of the client machines starts up. The second button shuts down all of the clients, and then the server.
 
 ### Markdown
 
@@ -10,6 +8,7 @@ Markdown is a lightweight and easy-to-use syntax for styling your writing. It in
 
 ```markdown
 Syntax highlighted code block
+There is not much special about the client Pi systems, but they need to be set up without a password so that the server can automatically connect.
 
 # Header 1
 ## Header 2
