@@ -15,7 +15,7 @@ The following should be installed on the server Pi:
 
 I generated ssh keys to allow me to start a ssh Terminal session from my MacBook and connect to the server without a password prompt. You should be able to enter `ssh pi@server.local` and log in with no warnings. Do that first, so that you can understand the process of generating and copying keys. Once that is working, you do the same process from the server Pi's terminal to each client. 
 
-Follow the instructions here for the Pi's [Remote access without passwords](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md)
+Follow the instructions here for to allow [remote access without passwords](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md) on the clients. I was able to use those instructions to do the same on my mac as well.
 
 On the mac, make sure the username you use matches, i.e. bryan@bryans-macbook-2015 where the instructions above say say eben@pi
 Once you've done this, if the Terminal keeps asking for a password enter:
@@ -38,12 +38,11 @@ This page has some helpful instructions for how to [automatically run ssh-add wi
 
 You will need to generate a key on the serving machine and then send it over to the client machine, making sure that you have already  set  the client Pi to allow empty passwords. 
 
-From the server, log in into the client machine:
-```sudo nano /etc/ssh/sshd_config
-```
-Set it to allow empty passwords. Follow the instructions for the server [here](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md) Copy over the id_rsa.pub to the client machine as instructed in that article. You can leave the server’s sshd_config as is, just the client needs to allow no password. 
+From the server, log in into the client machine: `sudo nano /etc/ssh/sshd_config`
 
-#### Set up steps for the client machines:
+Set it to allow empty passwords. Follow the instructions for the server [here](https://www.raspberrypi.org/documentation/remote-access/ssh/passwordless.md) Copy over the id_rsa.pub to the client machine as instructed in that article. Technically, you can leave the server’s sshd_config as is, just the client needs to allow no password, but following these instructions I set up the server to allow my mac to login without a prompt as well.
+
+#### Setting up the client Pi's:
 1. Install jessie
 2. Create a .ssh folder
 ```
