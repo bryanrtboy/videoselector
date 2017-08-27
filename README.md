@@ -103,3 +103,24 @@ After doing that, you can check what was added :
 ```
 sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
 ```
+### Starting up the server
+
+Writing the the command:
+```
+sleep 10
+python naropa_installation/main.py
+```
+into `nano ~/.bashrc` works, but it runs with each login. You may have to change [ownership and permissions](https://raspberrypi.stackexchange.com/questions/12853/automatically-run-a-program-as-root-for-gpio) on the main.py and Client scripts for it to work with GPIO devices.
+
+I would love a pull request with a better startup script idea. Seems like there are too many ways to do run Python startup scripts, and they all have issues with permissions, user, etc. For example, adding this to `/etc/rc.local` did not seem to work:
+```
+startscript(){
+  sleep 10
+  XAUTHORITY=~pi/.Xauthority DISPLAY=:0 python /home/pi/naropa_installation/main.py
+  exit 1
+}
+startscript&
+exit 0
+```
+The SSH scripts were not able to connect to the clients, I'm sure it's because the keys are generated from 'pi' user, not root. [Logging in to the LXDE](http://www.opentechguides.com/how-to/article/raspberry-pi/5/raspberry-pi-auto-start.html) environment allowed SSH to connect, but the server display did not show the interface. 
+
