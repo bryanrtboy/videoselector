@@ -103,7 +103,7 @@ After doing that, you can check what was added :
 ```
 sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
 ```
-### Starting up the server
+### Automatically running the script on Startup
 
 Writing the the command:
 ```
