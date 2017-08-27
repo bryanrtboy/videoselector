@@ -69,6 +69,10 @@ sudo chmod 755 ~/dbuscontrol.sh
 
 If you get errors running dbuscontrol from your scripts, you might need to run omxplayer as sudo.
 
+### Preparing the USB Drives
+
+The clients each expect to have a USB stick with a folder called 'media'. In the media folder, there should be an 'intro.mp4' and child folders corresponding to the names of the 3D models in 'main.py', i.e. gun, cake, fork, knife and bear.  Each folder has the same number of videos, numbered in sequence starting with 'mov_01.mp4'. The script randomly picks and plays from those folders.
+
 
 ### Setting up WIFI on all the machines
 
