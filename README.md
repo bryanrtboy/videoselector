@@ -105,12 +105,12 @@ sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
 ```
 ### Automatically running the script on Startup
 
-Writing the the command:
+Writing the command:
 ```
 sleep 10
 python naropa_installation/main.py
 ```
-into `nano ~/.bashrc` works, but it runs with each login. You may have to change [ownership and permissions](https://raspberrypi.stackexchange.com/questions/12853/automatically-run-a-program-as-root-for-gpio) on the main.py and Client scripts for it to work with GPIO devices.
+into `nano ~/.bashrc` works, but it runs with each login. You may have to change [ownership and permissions](https://raspberrypi.stackexchange.com/questions/12853/automatically-run-a-program-as-root-for-gpio) on the main.py and Client scripts for that to work, since the server is using the GPIO pins.
 
 I would love a pull request with a better startup script idea. Seems like there are too many ways to do this on the Raspberry Pi, and many all have issues with permissions, user, etc. For example, adding this to `/etc/rc.local` did not seem to work:
 ```
@@ -122,5 +122,7 @@ startscript(){
 startscript&
 exit 0
 ```
-The SSH scripts were not able to connect to the clients, I'm sure it's because the keys are generated from 'pi' user, not root. [Logging in to the LXDE](http://www.opentechguides.com/how-to/article/raspberry-pi/5/raspberry-pi-auto-start.html) environment allowed SSH to connect, but the server display did not show the interface. The problem is, unless someone is trying to do the same thing, i.e. connect via SSH at startup, use the server as the main disply, etc., it's difficult to parse where the problem is and what the best approach is to run this at startup.
+The SSH script could not connect to the clients, I'm sure it's because the ssh keys are generated from 'pi' user, not root, and starting up is done by root. Putting the commands to [log into the LXDE](http://www.opentechguides.com/how-to/article/raspberry-pi/5/raspberry-pi-auto-start.html) environment allowed SSH to connect, the clients launched their videos. But, the server display did not show the interface. I could not figure out why not. 
+
+Unless someone is trying to do the same thing, i.e. connect via SSH at startup, use the server as the main display, etc., it's difficult to parse where the problem lies and what the best approach might be to run this at startup. Using `~/.bashrc` is OK, but since the display is running as root, it won't respond to keyboard commands. Logging in via another machine, causes a new instance to run, which does respond to keyboard commands, but leaves the first instance running. To quit, you have to `killall -9 UID` from terminal.
 
