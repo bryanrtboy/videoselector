@@ -72,7 +72,7 @@ sudo chmod 755 ~/dbuscontrol.sh
    - On the Pi make a directory: `sudo mkdir -p /mnt/usb`
    - Then set it to start up and mount to that directory: `sudo nano /etc/fstab`
    - Add this line to the end of fstab: `/dev/sda1 /mnt/usb vfat defaults,nofail 0 2`
-   - This setup assumes there is only one other drive plugged in and it's going to be called `sda`.
+   - This setup assumes there is only one usb drive plugged in and it's going to be called `sda`.
 
 If you get errors running dbuscontrol from your scripts, you might need to run omxplayer as sudo.
 
