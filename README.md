@@ -77,8 +77,8 @@ If you get errors running dbuscontrol from your scripts, you might need to run o
 
 The clients each expect to have a USB stick with a folder called 'media'. In the media folder, there should be an 'intro.mp4' and child folders corresponding to the names of the 3D models in 'main.py', i.e. gun, cake, fork, knife and bear.  
 - media
--- gun
---- mov_01.mp4
+- - gun
+- - - mov_01.mp4
 --- mov_02.mp4
 --- etc..
 -- cake
