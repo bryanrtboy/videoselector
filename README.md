@@ -1,6 +1,10 @@
 ## Video Selector
 
-This project uses a Raspberry Pi 3 as a server/controller to play videos on 5 client Pi's connected via a WIFI network. This set of python scripts is running on the server. The server is hooked up to a rotary encoder and two buttons. The rotary dial allows the user to scroll through 3D models rendered on screen, a button is then used to make a selection. Once the button is pressed, a video on one of the client machines starts up. The second button shuts down all of the clients, and then the server.
+This project uses a Raspberry Pi 3 as a server/controller to play videos on 5 client Pi's connected via a WIFI network. There should be no limit to the number of clients used. 
+
+To run, this set of python scripts should be running on the server in a directory located in '/home/pi/', in my case it's in a folder called 'naropa_installation'. Update the script with the path you are using. 
+
+The server is wired up through GPIO in order to get input from a rotary encoder [script](https://github.com/modmypi/Rotary-Encoder/) [instructions](https://www.modmypi.com/blog/how-to-use-a-rotary-encoder-with-the-raspberry-pi) and two buttons. The rotary dial allows the user to scroll through 3D models rendered on screen, a button is then used to make a selection. Once the button is pressed, a video on one of the client machines starts up. The second button shuts down all of the clients, and then the server.
 
 The script could be altered to accept keyboard commands and not use any GPIO hardware. To do so, set the 'counter' variable to the value -1 with the left arrow key, +1 with the right this would scroll the models left to right.  Use a key press to set READBUTTON to True in order to make the selection. READKNOB is probably not needed, that is used to poll the hardware at a reasonable rate, rather than the 60 FPS of the display loop.
 
